@@ -20,6 +20,8 @@ import {
   Link,
   Sparkles,
   Trash2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -89,6 +91,12 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
   const [passForm, setPassForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const [passStatus, setPassStatus] = useState({ type: '', message: '' });
   const [passLoading, setPassLoading] = useState(false);
+
+  // Show/Hide Password States
+  const [showLoginPass, setShowLoginPass] = useState(false);
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -483,13 +491,23 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
 
             <div>
               <label className="block text-sm font-bold text-slate-300 mb-1">Mật khẩu</label>
-              <input
-                type="password"
-                value={loginForm.password}
-                onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 text-white"
-                placeholder="Mật khẩu"
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPass ? 'text' : 'password'}
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-800 border border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  placeholder="Mật khẩu"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPass(!showLoginPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
+                  title={showLoginPass ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showLoginPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -1316,35 +1334,65 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Mật khẩu hiện tại</label>
-              <input
-                type="password"
-                placeholder="Nhập mật khẩu hiện tại"
-                value={passForm.oldPassword}
-                onChange={(e) => setPassForm({ ...passForm, oldPassword: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showOldPass ? 'text' : 'password'}
+                  placeholder="Nhập mật khẩu hiện tại"
+                  value={passForm.oldPassword}
+                  onChange={(e) => setPassForm({ ...passForm, oldPassword: e.target.value })}
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPass(!showOldPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
+                  title={showOldPass ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showOldPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Mật khẩu mới</label>
-              <input
-                type="password"
-                placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-                value={passForm.newPassword}
-                onChange={(e) => setPassForm({ ...passForm, newPassword: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showNewPass ? 'text' : 'password'}
+                  placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                  value={passForm.newPassword}
+                  onChange={(e) => setPassForm({ ...passForm, newPassword: e.target.value })}
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPass(!showNewPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
+                  title={showNewPass ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Nhập lại mật khẩu mới</label>
-              <input
-                type="password"
-                placeholder="Xác nhận mật khẩu mới"
-                value={passForm.confirmPassword}
-                onChange={(e) => setPassForm({ ...passForm, confirmPassword: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPass ? 'text' : 'password'}
+                  placeholder="Xác nhận mật khẩu mới"
+                  value={passForm.confirmPassword}
+                  onChange={(e) => setPassForm({ ...passForm, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPass(!showConfirmPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
+                  title={showConfirmPass ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button
