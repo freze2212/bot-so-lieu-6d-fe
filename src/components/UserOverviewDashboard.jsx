@@ -25,7 +25,7 @@ import UserReportForm from './UserReportForm';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
 export default function UserOverviewDashboard({ employees = [] }) {
-  const [selectedEmployeeCode, setSelectedEmployeeCode] = useState(() => localStorage.getItem('authorizedEmpCode') || 'GG88F4D04');
+  const [selectedEmployeeCode, setSelectedEmployeeCode] = useState(() => localStorage.getItem('authorizedEmpCode') || '');
   const [granularity, setGranularity] = useState('day');
   const [showReportModal, setShowReportModal] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(() => Boolean(localStorage.getItem('authorizedEmpCode')));
@@ -74,7 +74,7 @@ export default function UserOverviewDashboard({ employees = [] }) {
 
   const currentEmp = employees.find(
     (e) => e.code.toLowerCase() === selectedEmployeeCode.toLowerCase()
-  ) || { name: 'GHE BIFRONS', code: selectedEmployeeCode || 'GG88F4D04' };
+  ) || { name: '', code: selectedEmployeeCode || '' };
 
   // Strict matching set for selected employee
   const matchingCodes = new Set([
@@ -198,11 +198,11 @@ export default function UserOverviewDashboard({ employees = [] }) {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-indigo-500/25">
-                4D
+                📊
               </div>
               <div>
                 <h1 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                  <span>BÁO CÁO 4D</span>
+                  <span>BÁO CÁO</span>
                   <span className="text-xs font-semibold text-slate-400 font-mono">v1.2.0</span>
                 </h1>
                 <p className="text-xs text-slate-400">Trang Tổng Quan Cá Nhân & Số Liệu</p>
@@ -222,7 +222,7 @@ export default function UserOverviewDashboard({ employees = [] }) {
                     {emp.name} ({emp.code})
                   </option>
                 ))}
-                {employees.length === 0 && <option value="GG88F4D04" className="bg-slate-900 text-white">GHE BIFRONS (GG88F4D04)</option>}
+                {employees.length === 0 && <option value="" className="bg-slate-900 text-white">Chưa có nhân viên</option>}
               </select>
             </div>
           </div>

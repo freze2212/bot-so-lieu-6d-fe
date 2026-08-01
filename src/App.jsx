@@ -47,7 +47,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-800/80 bg-[#070a12]">
-        BÁO CÁO 4D ONLINE • Hệ Thống Thống Kê Số Liệu Cá Nhân
+        BÁO CÁO ONLINE • Hệ Thống Thống Kê Số Liệu Cá Nhân
       </footer>
     </div>
   );
