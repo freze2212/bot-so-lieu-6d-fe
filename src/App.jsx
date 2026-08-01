@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import UserOverviewDashboard from './components/UserOverviewDashboard';
 import AdminDashboard from './components/AdminDashboard';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function App() {
   // Determine view mode from URL path (/admin) or URL query parameter (?mode=admin)

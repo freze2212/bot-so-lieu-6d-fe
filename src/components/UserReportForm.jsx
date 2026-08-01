@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, AlertCircle, RefreshCw, UserCheck } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function UserReportForm({ employees = [], onReportSubmitted }) {
   const [employeeCode, setEmployeeCode] = useState('');
