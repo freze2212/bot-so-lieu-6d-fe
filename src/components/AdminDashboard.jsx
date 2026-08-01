@@ -85,6 +85,11 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
     todayFormatted: '',
   });
 
+  // Change Password State
+  const [passForm, setPassForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passStatus, setPassStatus] = useState({ type: '', message: '' });
+  const [passLoading, setPassLoading] = useState(false);
+
   useEffect(() => {
     if (token) {
       fetchDashboardData();
@@ -243,6 +248,44 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
     }
     localStorage.removeItem('adminToken');
     setToken('');
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!passForm.oldPassword || !passForm.newPassword) {
+      setPassStatus({ type: 'error', message: 'Vui lòng nhập đầy đủ Mật khẩu hiện tại và Mật khẩu mới!' });
+      return;
+    }
+    if (passForm.newPassword !== passForm.confirmPassword) {
+      setPassStatus({ type: 'error', message: 'Mật khẩu mới và Nhập lại mật khẩu không trùng khớp!' });
+      return;
+    }
+    if (passForm.newPassword.length < 6) {
+      setPassStatus({ type: 'error', message: 'Mật khẩu mới phải có ít nhất 6 ký tự!' });
+      return;
+    }
+    setPassLoading(true);
+    setPassStatus({ type: '', message: '' });
+    try {
+      const res = await fetch(`${API_BASE}/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oldPassword: passForm.oldPassword,
+          newPassword: passForm.newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Đổi mật khẩu thất bại!');
+      }
+      setPassStatus({ type: 'success', message: data.message || 'Đổi mật khẩu Admin thành công!' });
+      setPassForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPassStatus({ type: 'error', message: err.message });
+    } finally {
+      setPassLoading(false);
+    }
   };
 
   const handleCreateEmployee = async (e) => {
@@ -542,6 +585,18 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
         >
           <FileSpreadsheet className="w-4 h-4" />
           <span>Lịch Sử Báo Cáo ({reportsList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('password')}
+          className={`pb-3 px-4 font-bold text-sm border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
+            activeTab === 'password'
+              ? 'border-indigo-500 text-indigo-400'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          <Lock className="w-4 h-4" />
+          <span>Đổi Mật Khẩu Admin</span>
         </button>
       </div>
 
@@ -1227,6 +1282,89 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* CHANGE PASSWORD TAB */}
+      {activeTab === 'password' && (
+        <div className="max-w-md mx-auto bg-[#0b0f19] p-6 rounded-2xl border border-slate-800/90 shadow-xl space-y-6">
+          <div>
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <Lock className="w-6 h-6 text-indigo-400" />
+              <span>Đổi Mật Khẩu Admin</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">Cập nhật mật khẩu quản trị hệ thống</p>
+          </div>
+
+          {passStatus.message && (
+            <div
+              className={`p-3.5 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                passStatus.type === 'success'
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+              }`}
+            >
+              {passStatus.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+              )}
+              <span>{passStatus.message}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Mật khẩu hiện tại</label>
+              <input
+                type="password"
+                placeholder="Nhập mật khẩu hiện tại"
+                value={passForm.oldPassword}
+                onChange={(e) => setPassForm({ ...passForm, oldPassword: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Mật khẩu mới</label>
+              <input
+                type="password"
+                placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                value={passForm.newPassword}
+                onChange={(e) => setPassForm({ ...passForm, newPassword: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Nhập lại mật khẩu mới</label>
+              <input
+                type="password"
+                placeholder="Xác nhận mật khẩu mới"
+                value={passForm.confirmPassword}
+                onChange={(e) => setPassForm({ ...passForm, confirmPassword: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={passLoading}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {passLoading ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Đang cập nhật...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Cập Nhật Mật Khẩu</span>
+                </>
+              )}
+            </button>
+          </form>
         </div>
       )}
 
