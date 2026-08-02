@@ -38,6 +38,15 @@ import {
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
+const getAuthHeaders = (tokenStr) => {
+  const headers = { 'Content-Type': 'application/json' };
+  const currentToken = tokenStr || localStorage.getItem('adminToken');
+  if (currentToken) {
+    headers['Authorization'] = `Bearer ${currentToken}`;
+  }
+  return headers;
+};
+
 export default function AdminDashboard({ employees, onEmployeeAdded }) {
   const [token, setToken] = useState(() => localStorage.getItem('adminToken') || '');
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'employees' | 'reports' | 'telegram'
@@ -277,7 +286,7 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
     try {
       const res = await fetch(`${API_BASE}/auth/change-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(token),
         body: JSON.stringify({
           oldPassword: passForm.oldPassword,
           newPassword: passForm.newPassword,
@@ -285,6 +294,7 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 401) handleLogout();
         throw new Error(data.message || 'Đổi mật khẩu thất bại!');
       }
       setPassStatus({ type: 'success', message: data.message || 'Đổi mật khẩu Admin thành công!' });
@@ -309,12 +319,13 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
     try {
       const res = await fetch(`${API_BASE}/employees`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(token),
         body: JSON.stringify(newEmp),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 401) handleLogout();
         throw new Error(data.message || 'Lỗi thêm nhân viên');
       }
 
@@ -333,15 +344,21 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
   };
 
   const handleDeleteEmployee = async (emp) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa nhân viên ${emp.name} (${emp.code}) không?`)) {
+    const targetId = emp.id || emp.code || emp.employeeCode;
+    const empName = emp.name || emp.employeeName || targetId;
+    const empCode = emp.code || emp.employeeCode || targetId;
+
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa nhân viên ${empName} (${empCode}) không?`)) {
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/employees/${emp.id}`, {
+      const res = await fetch(`${API_BASE}/employees/${targetId}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(token),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
+        if (res.status === 401) handleLogout();
         throw new Error(data.message || 'Không thể xóa nhân viên');
       }
       if (onEmployeeAdded) onEmployeeAdded();
