@@ -44,10 +44,26 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
     }
   }, [employeeCode, employees]);
 
+  const parseRawNumber = (val) => {
+    if (!val) return 0;
+    const digitsOnly = String(val).replace(/\D/g, '');
+    return Number(digitsOnly) || 0;
+  };
+
   const handleInputChange = (field, value) => {
+    if (!value) {
+      setFormData((prev) => ({ ...prev, [field]: '' }));
+      return;
+    }
+    const digitsOnly = String(value).replace(/\D/g, '');
+    if (!digitsOnly) {
+      setFormData((prev) => ({ ...prev, [field]: '' }));
+      return;
+    }
+    const formatted = Number(digitsOnly).toLocaleString('en-US');
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: formatted,
     }));
   };
 
@@ -86,15 +102,17 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
         body: JSON.stringify({
           employeeCode: trimmedCode,
           date: selectedDate,
-          registeredCount: Number(formData.registeredCount) || 0,
-          firstDepositCount: Number(formData.firstDepositCount) || 0,
-          depositorsCount: Number(formData.depositorsCount) || 0,
-          totalDeposit: Number(formData.totalDeposit) || 0,
-          totalBet: Number(formData.totalBet) || 0,
+          registeredCount: parseRawNumber(formData.registeredCount),
+          firstDepositCount: parseRawNumber(formData.firstDepositCount),
+          depositorsCount: parseRawNumber(formData.depositorsCount),
+          totalDeposit: parseRawNumber(formData.totalDeposit),
+          totalBet: parseRawNumber(formData.totalBet),
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (e) {}
 
       if (!res.ok) {
         throw new Error(data.message || 'Lỗi gửi báo cáo!');
@@ -219,12 +237,12 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
               Số khách đăng kí
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={formData.registeredCount}
               onChange={(e) => handleInputChange('registeredCount', e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all font-semibold"
             />
           </div>
 
@@ -234,12 +252,12 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
               Số khách nạp đầu (Khách mới)
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={formData.firstDepositCount}
               onChange={(e) => handleInputChange('firstDepositCount', e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all font-semibold"
             />
           </div>
 
@@ -249,12 +267,12 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
               Số lượng người nạp tiền (Trong ngày)
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={formData.depositorsCount}
               onChange={(e) => handleInputChange('depositorsCount', e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/20 text-slate-800 text-sm font-semibold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/20 text-slate-800 text-sm font-semibold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all font-semibold"
             />
           </div>
 
@@ -264,12 +282,12 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
               Tổng Nạp / Ngày (VND)
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={formData.totalDeposit}
               onChange={(e) => handleInputChange('totalDeposit', e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all font-semibold"
             />
           </div>
 
@@ -279,12 +297,12 @@ export default function UserReportForm({ employees = [], onReportSubmitted }) {
               Tổng Cược / Ngày (VND)
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
               value={formData.totalBet}
               onChange={(e) => handleInputChange('totalBet', e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all font-semibold"
             />
           </div>
 
