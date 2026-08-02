@@ -386,6 +386,8 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
       fetchDashboardData();
     } catch (err) {
       alert(err.message);
+      if (onEmployeeAdded) onEmployeeAdded();
+      fetchDashboardData();
     }
   };
 
