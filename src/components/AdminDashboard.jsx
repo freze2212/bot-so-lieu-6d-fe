@@ -47,6 +47,18 @@ const getAuthHeaders = (tokenStr) => {
   return headers;
 };
 
+const parseResponseJson = async (res) => {
+  const text = await res.text();
+  if (!text || !text.trim()) {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return { message: text };
+  }
+};
+
 export default function AdminDashboard({ employees, onEmployeeAdded }) {
   const [token, setToken] = useState(() => localStorage.getItem('adminToken') || '');
   const [activeTab, setActiveTab] = useState('stats'); // 'stats' | 'employees' | 'reports' | 'telegram'
@@ -242,7 +254,7 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm),
       });
-      const data = await res.json();
+      const data = await parseResponseJson(res);
 
       if (!res.ok) {
         throw new Error(data.message || 'Đăng nhập thất bại');
@@ -292,9 +304,12 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
           newPassword: passForm.newPassword,
         }),
       });
-      const data = await res.json();
+      const data = await parseResponseJson(res);
       if (!res.ok) {
-        if (res.status === 401) handleLogout();
+        if (res.status === 401) {
+          handleLogout();
+          throw new Error('Phiên làm việc đã hết hạn, vui lòng đăng nhập lại!');
+        }
         throw new Error(data.message || 'Đổi mật khẩu thất bại!');
       }
       setPassStatus({ type: 'success', message: data.message || 'Đổi mật khẩu Admin thành công!' });
@@ -323,9 +338,12 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
         body: JSON.stringify(newEmp),
       });
 
-      const data = await res.json();
+      const data = await parseResponseJson(res);
       if (!res.ok) {
-        if (res.status === 401) handleLogout();
+        if (res.status === 401) {
+          handleLogout();
+          throw new Error('Phiên làm việc đã hết hạn, vui lòng đăng nhập lại!');
+        }
         throw new Error(data.message || 'Lỗi thêm nhân viên');
       }
 
@@ -356,9 +374,12 @@ export default function AdminDashboard({ employees, onEmployeeAdded }) {
         method: 'DELETE',
         headers: getAuthHeaders(token),
       });
-      const data = await res.json();
+      const data = await parseResponseJson(res);
       if (!res.ok) {
-        if (res.status === 401) handleLogout();
+        if (res.status === 401) {
+          handleLogout();
+          throw new Error('Phiên làm việc đã hết hạn, vui lòng đăng nhập lại!');
+        }
         throw new Error(data.message || 'Không thể xóa nhân viên');
       }
       if (onEmployeeAdded) onEmployeeAdded();
